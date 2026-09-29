@@ -87,6 +87,28 @@ export function MoMoMark({ size = 28 }: { size?: number }) {
   );
 }
 
+/** Icon Quỹ (theo icon Tiền thưởng) — nhóm người trong vòng tròn, nét hồng. */
+export function QuyMark({ size = 28, color = colors.primary }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 28 28" fill="none">
+      <Circle cx={14} cy={14} r={12.5} fill="#FDEAF3" />
+      <Circle cx={14} cy={10.5} r={2.8} stroke={color} strokeWidth={1.6} />
+      <Circle cx={8.3} cy={12.5} r={2.1} stroke={color} strokeWidth={1.5} />
+      <Circle cx={19.7} cy={12.5} r={2.1} stroke={color} strokeWidth={1.5} />
+      <Path d="M9 20.5c.6-2.6 2.6-4.2 5-4.2s4.4 1.6 5 4.2" stroke={color} strokeWidth={1.6} strokeLinecap="round" />
+      <Path d="M4.8 19c.3-1.6 1.6-2.7 3.3-2.7M23.2 19c-.3-1.6-1.6-2.7-3.3-2.7" stroke={color} strokeWidth={1.5} strokeLinecap="round" />
+    </Svg>
+  );
+}
+
+export function IconChevronRight({ size = 14, color = colors.primary }: IconProps) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 14 14" fill="none">
+      <Path d="M5 2.5L9.5 7 5 11.5" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+    </Svg>
+  );
+}
+
 export function RadioMark({ selected, size = 22 }: { selected: boolean; size?: number }) {
   return (
     <Svg width={size} height={size} viewBox="0 0 22 22">

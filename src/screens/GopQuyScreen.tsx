@@ -2,12 +2,13 @@ import React, { useState } from 'react';
 import { KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { ButtonFooter } from '../components/ButtonFooter';
 import { FundingSourceItem } from '../components/FundingSourceItem';
-import { IconBankTransfer, MoMoMark, TuiThanTaiMark, VcbMark } from '../components/icons';
+import { IconBankTransfer, MoMoMark, QuyMark, TuiThanTaiMark, VcbMark } from '../components/icons';
 import { InputText } from '../components/InputText';
 import { Tabs } from '../components/Tabs';
 import { TopNavigation } from '../components/TopNavigation';
 import {
   DEFAULT_FUNDING_SOURCE,
+  DEFAULT_VCB_BALANCE_SHARED,
   DEFAULT_WITHDRAW_DESTINATION,
   FUND_BALANCE,
   FUNDING_SOURCES,
@@ -26,6 +27,7 @@ const SOURCE_ICONS: Record<FundingSourceId, React.ReactNode> = {
   vcb: <VcbMark />,
   momo_wallet: <MoMoMark />,
   tui_than_tai: <TuiThanTaiMark />,
+  tich_luy: <QuyMark />,
   bank_transfer: <IconBankTransfer />,
 };
 
@@ -67,6 +69,9 @@ export const formatVnd = (n: number) => `${n.toLocaleString('vi-VN').replace(/,/
 
 export default function GopQuyScreen() {
   const [tab, setTab] = useState<Mode>('gop');
+  // Chia sẻ số dư ngân hàng liên kết — dùng chung cho cả 2 tab.
+  const [balanceShared, setBalanceShared] = useState(DEFAULT_VCB_BALANCE_SHARED);
+  const [consentOpen, setConsentOpen] = useState(false);
   return (
     <View style={styles.root}>
       <TopNavigation title="Góp/Rút" />
@@ -78,12 +83,50 @@ export default function GopQuyScreen() {
         value={tab}
         onChange={setTab}
       />
-      <FundTab key={tab} mode={tab} />
+      <FundTab key={tab} mode={tab} balanceShared={balanceShared} onRequestConsent={() => setConsentOpen(true)} />
+
+      {/* Đăng ký xem số dư VCB (mock) */}
+      <Modal transparent visible={consentOpen} animationType="fade" onRequestClose={() => setConsentOpen(false)}>
+        <Pressable style={styles.backdrop} onPress={() => setConsentOpen(false)}>
+          <Pressable style={styles.sheet} onPress={() => {}}>
+            <View style={{ alignItems: 'center' }}>
+              <VcbMark size={44} />
+            </View>
+            <Text style={[typography.sectionTitle, { textAlign: 'center', marginTop: spacing.md }]}>
+              Xem số dư VCB ngay trên MoMo
+            </Text>
+            <Text style={[typography.caption, { textAlign: 'center', marginTop: spacing.sm, lineHeight: 19 }]}>
+              Cho phép MoMo hiển thị số dư tài khoản VCB để bạn chọn nguồn tiền nhanh hơn. Bạn có thể tắt bất cứ lúc
+              nào trong Cài đặt.
+            </Text>
+            <Pressable
+              style={[styles.sheetBtn, { marginTop: spacing.xl }]}
+              onPress={() => {
+                setBalanceShared(true);
+                setConsentOpen(false);
+              }}
+            >
+              <Text style={[typography.button, { color: colors.onPrimary }]}>Đồng ý</Text>
+            </Pressable>
+            <Pressable style={styles.sheetBtnGhost} onPress={() => setConsentOpen(false)}>
+              <Text style={[typography.button, { color: colors.textSecondary }]}>Để sau</Text>
+            </Pressable>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </View>
   );
 }
 
-function FundTab({ mode }: { mode: Mode }) {
+function FundTab({
+  mode,
+  balanceShared,
+  onRequestConsent,
+}: {
+  mode: Mode;
+  balanceShared: boolean;
+  onRequestConsent: () => void;
+}) {
   const cfg = MODE_CONFIG[mode];
   const [amountDigits, setAmountDigits] = useState('');
   const [note, setNote] = useState('');
@@ -93,9 +136,12 @@ function FundTab({ mode }: { mode: Mode }) {
 
   const amount = Number(amountDigits || 0);
   const selected = cfg.sources.find((s) => s.id === source)!;
+  const needsConsent = (s: FundingSource) => !!s.requiresBalanceConsent && !balanceShared;
+  const visibleBalance = (s: FundingSource) => (needsConsent(s) ? undefined : s.balance);
 
   // Góp: không vượt số dư nguồn tiền. Rút: không vượt số dư quỹ.
-  const sourceShort = mode === 'gop' && selected.balance !== undefined && amount > selected.balance;
+  const selectedBalance = visibleBalance(selected);
+  const sourceShort = mode === 'gop' && selectedBalance !== undefined && amount > selectedBalance;
   const fundShort = mode === 'rut' && amount > FUND_BALANCE;
   const canSubmit = amount > 0 && !sourceShort && !fundShort;
 
@@ -163,7 +209,8 @@ function FundTab({ mode }: { mode: Mode }) {
               key={s.id}
               icon={SOURCE_ICONS[s.id]}
               label={s.label}
-              balance={s.balance !== undefined ? formatVnd(s.balance) : undefined}
+              balance={visibleBalance(s) !== undefined ? formatVnd(visibleBalance(s)!) : undefined}
+              action={needsConsent(s) ? { label: 'Đăng ký xem số dư', onPress: onRequestConsent } : undefined}
               error={s.id === source && sourceShort ? 'Số dư không đủ, chọn nguồn tiền khác' : undefined}
               selected={source === s.id}
               onPress={() => setSource(s.id)}
@@ -264,6 +311,7 @@ const styles = StyleSheet.create({
     marginTop: spacing.md,
     gap: spacing.md,
   },
+  sheetBtnGhost: { height: 44, alignItems: 'center', justifyContent: 'center', marginTop: spacing.sm },
   sheetBtn: {
     height: 48,
     borderRadius: radius.sm,

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { colors, radius, spacing, typography } from '../theme';
-import { RadioMark } from './icons';
+import { IconChevronRight, RadioMark } from './icons';
 
 /**
  * Một nguồn tiền trong danh sách "Chọn nguồn tiền".
@@ -13,6 +13,7 @@ export function FundingSourceItem({
   label,
   balance,
   error,
+  action,
   selected,
   onPress,
 }: {
@@ -20,6 +21,8 @@ export function FundingSourceItem({
   label: string;
   balance?: string;
   error?: string;
+  /** Thay dòng số dư bằng link (vd. "Đăng ký xem số dư" khi chưa chia sẻ số dư). */
+  action?: { label: string; onPress: () => void };
   selected: boolean;
   onPress: () => void;
 }) {
@@ -32,7 +35,15 @@ export function FundingSourceItem({
     >
       <View style={styles.icon}>{icon}</View>
       <View style={{ flex: 1 }}>
-        {balance !== undefined ? (
+        {action ? (
+          <>
+            <Text style={styles.label}>{label}</Text>
+            <Pressable onPress={action.onPress} hitSlop={6} style={styles.action} accessibilityRole="link">
+              <Text style={styles.actionText}>{action.label}</Text>
+              <IconChevronRight size={13} />
+            </Pressable>
+          </>
+        ) : balance !== undefined ? (
           <>
             <Text style={styles.label}>{label}</Text>
             <Text style={styles.balance}>{balance}</Text>
@@ -69,4 +80,6 @@ const styles = StyleSheet.create({
   label: { fontSize: 13, color: colors.textHint },
   balance: { fontSize: 15, fontWeight: '700', color: colors.textPrimary, marginTop: 1 },
   error: { fontSize: 12, color: colors.danger, marginTop: 2 },
+  action: { flexDirection: 'row', alignItems: 'center', gap: 2, marginTop: 1, alignSelf: 'flex-start' },
+  actionText: { fontSize: 15, fontWeight: '700', color: colors.primary },
 });

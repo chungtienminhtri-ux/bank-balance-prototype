@@ -15,6 +15,8 @@ npx expo start --tunnel   # quét QR bằng Expo Go
 # hoặc: npm run web
 ```
 
+**Chia sẻ số dư ngân hàng (WS1):** mặc định VCB ở trạng thái *chưa chia sẻ số dư* → hiện "Đăng ký xem số dư ›". Bấm vào mở sheet xin phép; Đồng ý thì cả 2 tab hiện số dư VCB. Tải lại app để quay về trạng thái chưa chia sẻ. Nguồn **Tích Luỹ** (200.000đ) có ở cả Góp và Rút.
+
 ## Cấu trúc
 
 - `src/screens/GopQuyScreen.tsx` — màn Góp/Rút, 2 tab dùng chung `FundTab` (khác biệt gom trong `MODE_CONFIG`), sheet xác nhận mock
@@ -31,3 +33,7 @@ npx expo start --tunnel   # quét QR bằng Expo Go
 | Rút quỹ | Vượt số dư quỹ | Xác nhận rút |
 |---|---|---|
 | ![](docs/6_rut_filled.png) | ![](docs/7_rut_over.png) | ![](docs/8_rut_confirm.png) |
+
+| VCB chưa chia sẻ số dư | Xin phép xem số dư | Góp từ Tích Luỹ |
+|---|---|---|
+| ![](docs/9_gop_unshared.png) | ![](docs/10_consent.png) | ![](docs/11_gop_shared_tichluy.png) |

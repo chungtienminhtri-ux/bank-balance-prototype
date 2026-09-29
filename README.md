@@ -1,6 +1,26 @@
 # bank-balance-prototype
 
-Prototype luồng Liên kết số dư ngân hàng (Bank Balance Link) — Expo + Figma MCP.
+Prototype màn **Góp quỹ** mới: giữ nguyên nhập số tiền + ghi chú, thêm phần **chọn cách nạp tiền** (Chuyển khoản từ ngân hàng / Nạp từ ngân hàng liên kết) theo pattern màn Túi Thần Tài.
 
-- Branch làm việc: `fund-bank-balance`
-- Chạy local: `npm install` → `npx expo start --tunnel` → quét QR bằng Expo Go.
+## Chạy thử
+
+```bash
+git clone https://github.com/chungtienminhtri-ux/bank-balance-prototype
+cd bank-balance-prototype
+git checkout fund-bank-balance
+npm install
+npx expo start --tunnel   # quét QR bằng Expo Go
+# hoặc: npm run web
+```
+
+## Cấu trúc
+
+- `src/screens/GopQuyScreen.tsx` — màn Góp/Rút (tab Góp quỹ), sheet xác nhận mock
+- `src/components/` — đặt tên theo MoMo UI Kit: `TopNavigation`, `Tabs`, `InputText`, `ButtonFooter`, `PaymentMethodItem`
+- `src/theme.ts` — design tokens (màu, spacing, typography). **Tạm lấy theo ảnh màn hiện tại**; thay bằng variables từ MoMo UI Kit khi Figma MCP đọc được.
+
+## Preview
+
+| Mặc định | Đã nhập | Xác nhận |
+|---|---|---|
+| ![](docs/1_empty.png) | ![](docs/2_filled.png) | ![](docs/3_confirm.png) |

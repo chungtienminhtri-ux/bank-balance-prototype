@@ -17,4 +17,13 @@ export const FUNDING_SOURCES: FundingSource[] = [
 
 export const DEFAULT_FUNDING_SOURCE: FundingSourceId = 'momo_wallet';
 
+/** Nơi nhận tiền khi Rút quỹ. */
+export const WITHDRAW_DESTINATIONS: FundingSource[] = FUNDING_SOURCES.filter(
+  (s) => s.id === 'vcb' || s.id === 'momo_wallet',
+);
+
+export const DEFAULT_WITHDRAW_DESTINATION: FundingSourceId = 'momo_wallet';
+
+export const WITHDRAW_QUICK_AMOUNTS = [50_000, 100_000, 200_000];
+
 export const FUND_BALANCE = 2_470_177;

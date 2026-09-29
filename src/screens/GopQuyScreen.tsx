@@ -8,13 +8,17 @@ import { Tabs } from '../components/Tabs';
 import { TopNavigation } from '../components/TopNavigation';
 import {
   DEFAULT_FUNDING_SOURCE,
+  DEFAULT_WITHDRAW_DESTINATION,
   FUND_BALANCE,
   FUNDING_SOURCES,
+  FundingSource,
   FundingSourceId,
+  WITHDRAW_DESTINATIONS,
+  WITHDRAW_QUICK_AMOUNTS,
 } from '../mocks/fundingSources';
 import { colors, radius, spacing, typography } from '../theme';
 
-type Tab = 'gop' | 'rut';
+type Mode = 'gop' | 'rut';
 
 const NOTE_MAX = 200;
 
@@ -25,27 +29,44 @@ const SOURCE_ICONS: Record<FundingSourceId, React.ReactNode> = {
   bank_transfer: <IconBankTransfer />,
 };
 
+/** Khác biệt giữa Góp và Rút gom về một chỗ. */
+const MODE_CONFIG: Record<
+  Mode,
+  {
+    amountLabel: string;
+    sectionTitle: string;
+    sourceLabel: string;
+    cta: string;
+    sources: FundingSource[];
+    defaultSource: FundingSourceId;
+    quickAmounts?: number[];
+    showLimitLink?: boolean;
+  }
+> = {
+  gop: {
+    amountLabel: 'Cần góp',
+    sectionTitle: 'Chọn nguồn tiền',
+    sourceLabel: 'Nguồn tiền',
+    cta: 'Góp quỹ',
+    sources: FUNDING_SOURCES,
+    defaultSource: DEFAULT_FUNDING_SOURCE,
+    showLimitLink: true,
+  },
+  rut: {
+    amountLabel: 'Cần rút',
+    sectionTitle: 'Chọn nơi nhận tiền',
+    sourceLabel: 'Rút về',
+    cta: 'Rút quỹ',
+    sources: WITHDRAW_DESTINATIONS,
+    defaultSource: DEFAULT_WITHDRAW_DESTINATION,
+    quickAmounts: WITHDRAW_QUICK_AMOUNTS,
+  },
+};
+
 export const formatVnd = (n: number) => `${n.toLocaleString('vi-VN').replace(/,/g, '.')}đ`;
 
 export default function GopQuyScreen() {
-  const [tab, setTab] = useState<Tab>('gop');
-  const [amountDigits, setAmountDigits] = useState('');
-  const [note, setNote] = useState('');
-  const [source, setSource] = useState<FundingSourceId>(DEFAULT_FUNDING_SOURCE);
-  const [confirmOpen, setConfirmOpen] = useState(false);
-  const [done, setDone] = useState(false);
-
-  const amount = Number(amountDigits || 0);
-  const selected = FUNDING_SOURCES.find((s) => s.id === source)!;
-  const insufficient = selected.balance !== undefined && amount > selected.balance;
-  const canSubmit = amount > 0 && !insufficient;
-  const methodLabel = selected.label;
-
-  const onAmountChange = (text: string) => {
-    const digits = text.replace(/\D/g, '').replace(/^0+/, '').slice(0, 12);
-    setAmountDigits(digits);
-  };
-
+  const [tab, setTab] = useState<Mode>('gop');
   return (
     <View style={styles.root}>
       <TopNavigation title="Góp/Rút" />
@@ -57,65 +78,101 @@ export default function GopQuyScreen() {
         value={tab}
         onChange={setTab}
       />
+      <FundTab key={tab} mode={tab} />
+    </View>
+  );
+}
 
-      {tab === 'gop' ? (
-        <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-          <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-            {/* Số dư quỹ */}
-            <View style={styles.balanceRow}>
-              <Text style={typography.bodyStrong}>Số dư quỹ</Text>
-              <Text style={styles.balance}>{formatVnd(FUND_BALANCE)}</Text>
-            </View>
+function FundTab({ mode }: { mode: Mode }) {
+  const cfg = MODE_CONFIG[mode];
+  const [amountDigits, setAmountDigits] = useState('');
+  const [note, setNote] = useState('');
+  const [source, setSource] = useState<FundingSourceId>(cfg.defaultSource);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [done, setDone] = useState(false);
 
-            {/* Nhập số tiền + ghi chú — giữ nguyên thao tác màn hiện tại */}
-            <View style={styles.card}>
-              <InputText
-                label="Cần góp"
-                required
-                value={amountDigits ? formatVnd(amount) : ''}
-                onChangeText={onAmountChange}
-                placeholder="0đ"
-                keyboardType="number-pad"
-                inputStyle={typography.amount}
-              />
-              <View style={{ height: spacing.md }} />
-              <InputText
-                label={`Ghi chú (${note.length}/${NOTE_MAX})`}
-                value={note}
-                onChangeText={setNote}
-                maxLength={NOTE_MAX}
-                placeholder="Nhập ghi chú"
-              />
-            </View>
+  const amount = Number(amountDigits || 0);
+  const selected = cfg.sources.find((s) => s.id === source)!;
 
-            {/* Nguồn tiền — mới */}
-            <View style={styles.sectionHeader}>
-              <Text style={typography.sectionTitle}>Chọn nguồn tiền</Text>
-              <Pressable hitSlop={8}>
-                <Text style={styles.link}>Xem hạn mức</Text>
-              </Pressable>
-            </View>
-            <View style={[styles.card, { gap: spacing.md }]} accessibilityRole="radiogroup">
-              {FUNDING_SOURCES.map((s) => (
-                <FundingSourceItem
-                  key={s.id}
-                  icon={SOURCE_ICONS[s.id]}
-                  label={s.label}
-                  balance={s.balance !== undefined ? formatVnd(s.balance) : undefined}
-                  error={s.id === source && insufficient ? 'Số dư không đủ, chọn nguồn tiền khác' : undefined}
-                  selected={source === s.id}
-                  onPress={() => setSource(s.id)}
-                />
-              ))}
-            </View>
-          </ScrollView>
-          <ButtonFooter label="Góp quỹ" disabled={!canSubmit} onPress={() => setConfirmOpen(true)} />
-        </KeyboardAvoidingView>
-      ) : (
-        <View style={styles.placeholder}>
-          <Text style={typography.caption}>Rút quỹ — ngoài phạm vi prototype này.</Text>
+  // Góp: không vượt số dư nguồn tiền. Rút: không vượt số dư quỹ.
+  const sourceShort = mode === 'gop' && selected.balance !== undefined && amount > selected.balance;
+  const fundShort = mode === 'rut' && amount > FUND_BALANCE;
+  const canSubmit = amount > 0 && !sourceShort && !fundShort;
+
+  const onAmountChange = (text: string) => {
+    setAmountDigits(text.replace(/\D/g, '').replace(/^0+/, '').slice(0, 12));
+  };
+  const reset = () => {
+    setConfirmOpen(false);
+    setDone(false);
+    setAmountDigits('');
+    setNote('');
+  };
+
+  const quickChips = cfg.quickAmounts ? (
+    <View style={styles.chips}>
+      {cfg.quickAmounts.map((v) => (
+        <Pressable key={v} style={styles.chip} onPress={() => setAmountDigits(String(v))}>
+          <Text style={styles.chipText}>{formatVnd(v)}</Text>
+        </Pressable>
+      ))}
+    </View>
+  ) : undefined;
+
+  return (
+    <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+        <View style={styles.balanceRow}>
+          <Text style={typography.bodyStrong}>Số dư quỹ</Text>
+          <Text style={styles.balance}>{formatVnd(FUND_BALANCE)}</Text>
         </View>
-      )}
+
+        <View style={styles.card}>
+          <InputText
+            label={cfg.amountLabel}
+            required
+            value={amountDigits ? formatVnd(amount) : ''}
+            onChangeText={onAmountChange}
+            onClear={mode === 'rut' ? () => setAmountDigits('') : undefined}
+            placeholder="0đ"
+            keyboardType="number-pad"
+            inputStyle={typography.amount}
+            error={fundShort ? `Vượt số dư quỹ (${formatVnd(FUND_BALANCE)})` : undefined}
+          />
+          <View style={{ height: spacing.md }} />
+          <InputText
+            label={`Ghi chú (${note.length}/${NOTE_MAX})`}
+            value={note}
+            onChangeText={setNote}
+            maxLength={NOTE_MAX}
+            placeholder="Nhập ghi chú"
+          />
+        </View>
+
+        <View style={styles.sectionHeader}>
+          <Text style={typography.sectionTitle}>{cfg.sectionTitle}</Text>
+          {cfg.showLimitLink ? (
+            <Pressable hitSlop={8}>
+              <Text style={styles.link}>Xem hạn mức</Text>
+            </Pressable>
+          ) : null}
+        </View>
+        <View style={[styles.card, { gap: spacing.md }]} accessibilityRole="radiogroup">
+          {cfg.sources.map((s) => (
+            <FundingSourceItem
+              key={s.id}
+              icon={SOURCE_ICONS[s.id]}
+              label={s.label}
+              balance={s.balance !== undefined ? formatVnd(s.balance) : undefined}
+              error={s.id === source && sourceShort ? 'Số dư không đủ, chọn nguồn tiền khác' : undefined}
+              selected={source === s.id}
+              onPress={() => setSource(s.id)}
+            />
+          ))}
+        </View>
+      </ScrollView>
+
+      <ButtonFooter label={cfg.cta} disabled={!canSubmit} onPress={() => setConfirmOpen(true)} accessory={quickChips} />
 
       {/* Xác nhận (mock) */}
       <Modal transparent visible={confirmOpen} animationType="fade" onRequestClose={() => setConfirmOpen(false)}>
@@ -123,27 +180,19 @@ export default function GopQuyScreen() {
           <Pressable style={styles.sheet} onPress={() => {}}>
             {done ? (
               <>
-                <Text style={[typography.sectionTitle, { textAlign: 'center' }]}>Góp quỹ thành công</Text>
+                <Text style={[typography.sectionTitle, { textAlign: 'center' }]}>{cfg.cta} thành công</Text>
                 <Text style={[typography.caption, { textAlign: 'center', marginTop: spacing.sm }]}>
-                  {formatVnd(amount)} từ {methodLabel}
+                  {formatVnd(amount)} {mode === 'gop' ? 'từ' : 'về'} {selected.label}
                 </Text>
-                <Pressable
-                  style={[styles.sheetBtn, { marginTop: spacing.xl }]}
-                  onPress={() => {
-                    setConfirmOpen(false);
-                    setDone(false);
-                    setAmountDigits('');
-                    setNote('');
-                  }}
-                >
+                <Pressable style={[styles.sheetBtn, { marginTop: spacing.xl }]} onPress={reset}>
                   <Text style={[typography.button, { color: colors.onPrimary }]}>Xong</Text>
                 </Pressable>
               </>
             ) : (
               <>
-                <Text style={typography.sectionTitle}>Xác nhận góp quỹ</Text>
+                <Text style={typography.sectionTitle}>Xác nhận {cfg.cta.toLowerCase()}</Text>
                 <Row k="Số tiền" v={formatVnd(amount)} />
-                <Row k="Nguồn tiền" v={methodLabel} />
+                <Row k={cfg.sourceLabel} v={selected.label} />
                 {note ? <Row k="Ghi chú" v={note} /> : null}
                 <Pressable style={[styles.sheetBtn, { marginTop: spacing.xl }]} onPress={() => setDone(true)}>
                   <Text style={[typography.button, { color: colors.onPrimary }]}>Xác nhận</Text>
@@ -153,7 +202,7 @@ export default function GopQuyScreen() {
           </Pressable>
         </Pressable>
       </Modal>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -190,7 +239,17 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   link: { fontSize: 14, fontWeight: '600', color: colors.primary },
-  placeholder: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  chips: { flexDirection: 'row', gap: spacing.sm, marginBottom: spacing.sm },
+  chip: {
+    flex: 1,
+    height: 32,
+    borderRadius: radius.pill,
+    borderWidth: 1,
+    borderColor: colors.primaryBorder,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  chipText: { fontSize: 14, fontWeight: '600', color: colors.textPrimary },
   backdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'flex-end' },
   sheet: {
     backgroundColor: colors.surface,

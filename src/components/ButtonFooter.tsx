@@ -8,14 +8,18 @@ export function ButtonFooter({
   label,
   disabled,
   onPress,
+  accessory,
 }: {
   label: string;
   disabled?: boolean;
   onPress: () => void;
+  /** Nội dung phía trên nút (vd. chip số tiền nhanh). */
+  accessory?: React.ReactNode;
 }) {
   const insets = useSafeAreaInsets();
   return (
     <View style={[styles.wrap, { paddingBottom: Math.max(insets.bottom, spacing.md) }]}>
+      {accessory}
       <Pressable
         disabled={disabled}
         onPress={onPress}

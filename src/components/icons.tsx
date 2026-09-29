@@ -43,6 +43,31 @@ export function IconBankTransfer({ size = 28, color = colors.bankIcon }: IconPro
   );
 }
 
+/** Logo VCB (giản lược) — khiên xanh lá trên nền trắng. */
+export function VcbMark({ size = 28 }: { size?: number }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 28 28">
+      <Rect x={0.5} y={0.5} width={27} height={27} rx={6} fill="#fff" stroke="#E3E3E8" />
+      <Path d="M7 8c2.5-1 4.7-1.4 7-1.4S18.5 7 21 8c0 6.5-2.6 10.8-7 13.4C9.6 18.8 7 14.5 7 8z" fill="#00854A" />
+      <Path d="M10.5 10.5l3.5 6.5 3.5-6.5" stroke="#fff" strokeWidth={2} fill="none" strokeLinecap="round" strokeLinejoin="round" />
+    </Svg>
+  );
+}
+
+/** Icon Túi Thần Tài (giản lược) — túi vàng trên nền hồng nhạt. */
+export function TuiThanTaiMark({ size = 28 }: { size?: number }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 28 28">
+      <Rect x={0} y={0} width={28} height={28} rx={6} fill="#FDE3EE" />
+      <Path d="M10 8.5l1.6-2.5h4.8L18 8.5" fill="#F7A600" />
+      <Path d="M9 10.5h10l-.6-1.8H9.6z" fill="#E65C00" />
+      <Path d="M9.2 11c-2.6 2.3-3.7 5-3.2 7.5.5 2.3 2.6 3.5 8 3.5s7.5-1.2 8-3.5c.5-2.5-.6-5.2-3.2-7.5z" fill="#FFB800" />
+      <Circle cx={14} cy={16.5} r={2.6} fill="#E65C00" />
+      <Circle cx={14} cy={16.5} r={1.2} fill="#FFD76A" />
+    </Svg>
+  );
+}
+
 /** Mark MoMo — dùng cho "Nạp từ ngân hàng liên kết". */
 export function MoMoMark({ size = 28 }: { size?: number }) {
   return (

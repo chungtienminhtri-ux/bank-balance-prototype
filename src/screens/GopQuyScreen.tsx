@@ -1,34 +1,29 @@
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { ButtonFooter } from '../components/ButtonFooter';
-import { IconBankTransfer, MoMoMark } from '../components/icons';
+import { FundingSourceItem } from '../components/FundingSourceItem';
+import { IconBankTransfer, MoMoMark, TuiThanTaiMark, VcbMark } from '../components/icons';
 import { InputText } from '../components/InputText';
-import { PaymentMethodItem } from '../components/PaymentMethodItem';
 import { Tabs } from '../components/Tabs';
 import { TopNavigation } from '../components/TopNavigation';
+import {
+  DEFAULT_FUNDING_SOURCE,
+  FUND_BALANCE,
+  FUNDING_SOURCES,
+  FundingSourceId,
+} from '../mocks/fundingSources';
 import { colors, radius, spacing, typography } from '../theme';
 
 type Tab = 'gop' | 'rut';
-type Method = 'bank_transfer' | 'linked_bank';
 
-const FUND_BALANCE = 2470177;
 const NOTE_MAX = 200;
 
-const METHODS: { key: Method; title: string; subtitle: string; tag?: string; icon: React.ReactNode }[] = [
-  {
-    key: 'bank_transfer',
-    title: 'Chuyển khoản từ ngân hàng',
-    subtitle: 'Hạn mức nạp mỗi ngày: 3 giao dịch',
-    tag: 'Đề xuất',
-    icon: <IconBankTransfer />,
-  },
-  {
-    key: 'linked_bank',
-    title: 'Nạp từ ngân hàng liên kết',
-    subtitle: 'Hạn mức nạp mỗi tháng: 50 triệu',
-    icon: <MoMoMark />,
-  },
-];
+const SOURCE_ICONS: Record<FundingSourceId, React.ReactNode> = {
+  vcb: <VcbMark />,
+  momo_wallet: <MoMoMark />,
+  tui_than_tai: <TuiThanTaiMark />,
+  bank_transfer: <IconBankTransfer />,
+};
 
 export const formatVnd = (n: number) => `${n.toLocaleString('vi-VN').replace(/,/g, '.')}đ`;
 
@@ -36,13 +31,15 @@ export default function GopQuyScreen() {
   const [tab, setTab] = useState<Tab>('gop');
   const [amountDigits, setAmountDigits] = useState('');
   const [note, setNote] = useState('');
-  const [method, setMethod] = useState<Method>('linked_bank');
+  const [source, setSource] = useState<FundingSourceId>(DEFAULT_FUNDING_SOURCE);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [done, setDone] = useState(false);
 
   const amount = Number(amountDigits || 0);
-  const canSubmit = amount > 0 && !!method;
-  const methodLabel = useMemo(() => METHODS.find((m) => m.key === method)?.title ?? '', [method]);
+  const selected = FUNDING_SOURCES.find((s) => s.id === source)!;
+  const insufficient = selected.balance !== undefined && amount > selected.balance;
+  const canSubmit = amount > 0 && !insufficient;
+  const methodLabel = selected.label;
 
   const onAmountChange = (text: string) => {
     const digits = text.replace(/\D/g, '').replace(/^0+/, '').slice(0, 12);
@@ -91,23 +88,23 @@ export default function GopQuyScreen() {
               />
             </View>
 
-            {/* Phương thức nạp tiền — mới */}
+            {/* Nguồn tiền — mới */}
             <View style={styles.sectionHeader}>
-              <Text style={typography.sectionTitle}>Chọn cách nạp tiền</Text>
+              <Text style={typography.sectionTitle}>Chọn nguồn tiền</Text>
               <Pressable hitSlop={8}>
                 <Text style={styles.link}>Xem hạn mức</Text>
               </Pressable>
             </View>
-            <View style={[styles.card, { gap: spacing.md, paddingTop: spacing.lg }]} accessibilityRole="radiogroup">
-              {METHODS.map((m) => (
-                <PaymentMethodItem
-                  key={m.key}
-                  icon={m.icon}
-                  title={m.title}
-                  subtitle={m.subtitle}
-                  tag={m.tag}
-                  selected={method === m.key}
-                  onPress={() => setMethod(m.key)}
+            <View style={[styles.card, { gap: spacing.md }]} accessibilityRole="radiogroup">
+              {FUNDING_SOURCES.map((s) => (
+                <FundingSourceItem
+                  key={s.id}
+                  icon={SOURCE_ICONS[s.id]}
+                  label={s.label}
+                  balance={s.balance !== undefined ? formatVnd(s.balance) : undefined}
+                  error={s.id === source && insufficient ? 'Số dư không đủ, chọn nguồn tiền khác' : undefined}
+                  selected={source === s.id}
+                  onPress={() => setSource(s.id)}
                 />
               ))}
             </View>
@@ -128,7 +125,7 @@ export default function GopQuyScreen() {
               <>
                 <Text style={[typography.sectionTitle, { textAlign: 'center' }]}>Góp quỹ thành công</Text>
                 <Text style={[typography.caption, { textAlign: 'center', marginTop: spacing.sm }]}>
-                  {formatVnd(amount)} qua {methodLabel.toLowerCase()}
+                  {formatVnd(amount)} từ {methodLabel}
                 </Text>
                 <Pressable
                   style={[styles.sheetBtn, { marginTop: spacing.xl }]}

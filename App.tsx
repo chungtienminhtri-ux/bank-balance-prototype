@@ -16,8 +16,12 @@ export default function App() {
       <StatusBar style="dark" />
       {screen === 'gop-quy' ? (
         <GopQuyScreen onBack={home} />
-      ) : screen === 'profile' ? (
-        <ProfileScreen onNavigate={(t) => t === 'home' && home()} />
+      ) : screen === 'profile' || screen === 'profile-qr-corner' ? (
+        <ProfileScreen
+          key={screen}
+          qrEntry={screen === 'profile' ? 'tile' : 'corner'}
+          onNavigate={(t) => t === 'home' && home()}
+        />
       ) : (
         <LauncherScreen onOpen={setScreen} />
       )}

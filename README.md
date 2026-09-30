@@ -12,6 +12,10 @@ Quản lý tiện ích có thêm ô **Mã QR của tôi** (full-width, tag *Mớ
 |---|---|---|
 | ![](docs/Profile-01_man-Toi.png) | ![](docs/Profile-02_sheet-Ma-QR-cua-toi.png) | ![](docs/Profile-03_sheet-Ve-dat-cho.png) |
 
+**Phương án B:** nút QR ở góc phải thẻ hồ sơ (thay chevron), mở cùng sheet Mã QR của tôi; Quản lý tiện ích giữ nguyên 4 ô như app hiện tại.
+
+![](docs/So-sanh_Man-Toi_A-B.png)
+
 ## Chạy thử
 
 ```bash

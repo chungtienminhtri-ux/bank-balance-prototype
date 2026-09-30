@@ -52,6 +52,19 @@ export function IconAntiFraud({ size = 34, color = INK }: P) {
   );
 }
 
+/** QR ở góc thẻ hồ sơ — ngoặc 4 góc + 4 ô QR, nét đậm. */
+export function IconQrCorner({ size = 28, color = INK }: P) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 28 28">
+      <Path d="M2 8V4.5A2.5 2.5 0 014.5 2H8M20 2h3.5A2.5 2.5 0 0126 4.5V8M26 20v3.5a2.5 2.5 0 01-2.5 2.5H20M8 26H4.5A2.5 2.5 0 012 23.5V20" {...line(color, 1.8)} />
+      <Rect x={7} y={7} width={5.5} height={5.5} rx={1.2} {...line(color, 1.6)} />
+      <Rect x={15.5} y={7} width={5.5} height={5.5} rx={1.2} {...line(color, 1.6)} />
+      <Rect x={7} y={15.5} width={5.5} height={5.5} rx={1.2} {...line(color, 1.6)} />
+      <Path d="M15.5 15.5h2.5v2.5h-2.5zM19 19h2v2h-2z" fill={color} />
+    </Svg>
+  );
+}
+
 // ---------- Ô Quản lý tiện ích ----------
 export function TileQr({ size = 26 }: P) {
   return (

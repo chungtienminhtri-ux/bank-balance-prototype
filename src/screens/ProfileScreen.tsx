@@ -12,6 +12,7 @@ import {
   IconCamera,
   IconInvite,
   IconMalwareScan,
+  IconQrCorner,
   IconPaymentLink,
   IconPersonalData,
   IconShieldCheck,
@@ -50,7 +51,20 @@ const SHEET_ICONS: Record<string, React.ReactNode> = {
   travel: <SheetTravel />,
 };
 
-export default function ProfileScreen({ onNavigate }: { onNavigate?: (tab: NavTab) => void }) {
+/**
+ * Phương án đặt lối vào "Mã QR của tôi":
+ * - 'tile':   ô riêng trong Quản lý tiện ích (A)
+ * - 'corner': nút QR ở góc phải thẻ hồ sơ (B)
+ */
+export type QrEntry = 'tile' | 'corner';
+
+export default function ProfileScreen({
+  onNavigate,
+  qrEntry = 'tile',
+}: {
+  onNavigate?: (tab: NavTab) => void;
+  qrEntry?: QrEntry;
+}) {
   const insets = useSafeAreaInsets();
   const [sheet, setSheet] = useState<UtilityId | null>(null);
   const current = sheet ? UTILITY_SHEETS[sheet] : undefined;
@@ -96,7 +110,19 @@ export default function ProfileScreen({ onNavigate }: { onNavigate?: (tab: NavTa
               </View>
             ) : null}
           </View>
-          <Chevron size={18} color={colors.textPrimary} />
+          {qrEntry === 'corner' ? (
+            <Pressable
+              style={styles.qrCorner}
+              onPress={() => openUtility('my_qr')}
+              hitSlop={6}
+              accessibilityRole="button"
+              accessibilityLabel="Mã QR của tôi"
+            >
+              <IconQrCorner />
+            </Pressable>
+          ) : (
+            <Chevron size={18} color={colors.textPrimary} />
+          )}
         </Pressable>
 
         {/* Bảo mật */}
@@ -120,7 +146,8 @@ export default function ProfileScreen({ onNavigate }: { onNavigate?: (tab: NavTa
         <View style={[styles.card, { padding: spacing.md, gap: spacing.sm }]}>
           <Text style={styles.sectionTitle}>Quản lý tiện ích</Text>
 
-          {/* Mới: Mã QR của tôi */}
+          {/* Phương án A: Mã QR của tôi */}
+          {qrEntry === 'tile' ? (
           <Pressable style={[styles.tile, styles.qrTile]} onPress={() => openUtility('my_qr')} accessibilityRole="button">
             <TileQr size={30} />
             <View style={{ flex: 1 }}>
@@ -131,6 +158,7 @@ export default function ProfileScreen({ onNavigate }: { onNavigate?: (tab: NavTa
               <Text style={styles.newTagText}>Mới</Text>
             </View>
           </Pressable>
+          ) : null}
 
           <View style={styles.grid}>
             {UTILITIES.map(({ id, label, Icon }) => (
@@ -238,6 +266,16 @@ const styles = StyleSheet.create({
   qrHint: { fontSize: 12, color: colors.textSecondary, marginTop: 1 },
   newTag: { backgroundColor: colors.primary, borderRadius: radius.pill, paddingHorizontal: 8, paddingVertical: 2 },
   newTagText: { fontSize: 11, fontWeight: '700', color: colors.onPrimary },
+  qrCorner: {
+    width: 44,
+    height: 44,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: colors.border,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.surface,
+  },
   scan: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, padding: spacing.md },
   scanBtn: { borderWidth: 1.5, borderColor: colors.primary, borderRadius: radius.sm, paddingHorizontal: 10, paddingVertical: 6 },
   scanBtnText: { fontSize: 14, fontWeight: '700', color: colors.primary },

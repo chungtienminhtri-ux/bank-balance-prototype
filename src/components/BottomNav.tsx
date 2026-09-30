@@ -14,7 +14,15 @@ const TABS: { key: Exclude<NavTab, 'qr'>; label: string; Icon: typeof NavMe; dot
 ];
 
 /** Thanh tab dưới cùng của app MoMo, nút Mã VietQR nổi ở giữa. */
-export function BottomNav({ active, onPress }: { active: NavTab; onPress: (t: NavTab) => void }) {
+export function BottomNav({
+  active,
+  onPress,
+  centerLabel = 'Mã VietQR',
+}: {
+  active: NavTab;
+  onPress: (t: NavTab) => void;
+  centerLabel?: string;
+}) {
   const insets = useSafeAreaInsets();
   const renderTab = (t: (typeof TABS)[number]) => {
     const on = t.key === active;
@@ -34,12 +42,14 @@ export function BottomNav({ active, onPress }: { active: NavTab; onPress: (t: Na
     <View style={[styles.bar, { paddingBottom: Math.max(insets.bottom, 8) }]}>
       {renderTab(TABS[0])}
       {renderTab(TABS[1])}
-      <Pressable style={styles.tab} onPress={() => onPress('qr')} accessibilityRole="button">
+      <Pressable style={[styles.tab, { flex: 1.3 }]} onPress={() => onPress('qr')} accessibilityRole="button">
         <View style={styles.qrBtn}>
           <NavQr size={28} />
         </View>
         <View style={styles.qrLabel}>
-          <Text style={styles.qrLabelText}>Mã VietQR</Text>
+          <Text style={styles.qrLabelText} numberOfLines={1}>
+            {centerLabel}
+          </Text>
         </View>
       </Pressable>
       {renderTab(TABS[2])}

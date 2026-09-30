@@ -4,12 +4,13 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Chevron } from '../components/ListItem';
 import { colors, radius, spacing, typography } from '../theme';
 
-export type ScreenId = 'launcher' | 'gop-quy' | 'profile' | 'profile-qr-corner';
+export type ScreenId = 'launcher' | 'gop-quy' | 'profile' | 'profile-qr-corner' | 'profile-qr-pill';
 
 const ITEMS: { id: Exclude<ScreenId, 'launcher'>; title: string; subtitle: string }[] = [
   { id: 'gop-quy', title: 'Góp/Rút quỹ', subtitle: 'Chọn nguồn tiền, nơi nhận tiền, chia sẻ số dư VCB' },
   { id: 'profile', title: 'Tôi · Phương án A', subtitle: 'Mã QR của tôi là một ô trong Quản lý tiện ích' },
   { id: 'profile-qr-corner', title: 'Tôi · Phương án B', subtitle: 'Nút QR ở góc phải thẻ hồ sơ' },
+  { id: 'profile-qr-pill', title: 'Tôi · Phương án C', subtitle: 'Pill Mã QR thay chỗ số tài khoản dưới tên' },
 ];
 
 /** Màn chọn prototype để demo — không phải màn thật của app. */

@@ -13,6 +13,7 @@ import {
   IconInvite,
   IconMalwareScan,
   IconQrCorner,
+  IconVerified,
   IconPaymentLink,
   IconPersonalData,
   IconShieldCheck,
@@ -55,8 +56,9 @@ const SHEET_ICONS: Record<string, React.ReactNode> = {
  * Phương án đặt lối vào "Mã QR của tôi":
  * - 'tile':   ô riêng trong Quản lý tiện ích (A)
  * - 'corner': nút QR ở góc phải thẻ hồ sơ (B)
+ * - 'pill':   pill "Mã QR" thay chỗ pill Số tài khoản dưới tên (C)
  */
-export type QrEntry = 'tile' | 'corner';
+export type QrEntry = 'tile' | 'corner' | 'pill';
 
 export default function ProfileScreen({
   onNavigate,
@@ -103,8 +105,27 @@ export default function ProfileScreen({
             </View>
           </View>
           <View style={{ flex: 1, gap: 6 }}>
-            <Text style={styles.name}>{PROFILE.name}</Text>
-            {PROFILE.biometricVerified ? (
+            {qrEntry === 'pill' ? (
+              <>
+                <View style={styles.nameRow}>
+                  <Text style={styles.name}>{PROFILE.name}</Text>
+                  <IconVerified />
+                </View>
+                <Pressable
+                  style={({ pressed }) => [styles.qrPill, pressed && { opacity: 0.7 }]}
+                  onPress={() => openUtility('my_qr')}
+                  hitSlop={6}
+                  accessibilityRole="button"
+                  accessibilityLabel="Mã QR của tôi"
+                >
+                  <Text style={styles.qrPillText}>Mã QR</Text>
+                  <IconQrCorner size={17} />
+                </Pressable>
+              </>
+            ) : (
+              <Text style={styles.name}>{PROFILE.name}</Text>
+            )}
+            {qrEntry !== 'pill' && PROFILE.biometricVerified ? (
               <View style={styles.badge}>
                 <Text style={styles.badgeText}>Đã sinh trắc học</Text>
               </View>
@@ -194,7 +215,11 @@ export default function ProfileScreen({
         </View>
       </ScrollView>
 
-      <BottomNav active="me" onPress={(t) => onNavigate?.(t)} />
+      <BottomNav
+        active="me"
+        centerLabel={qrEntry === 'pill' ? 'QR ngân hàng' : 'Mã VietQR'}
+        onPress={(t) => onNavigate?.(t)}
+      />
 
       <BottomSheet visible={!!current} title={current?.title ?? ''} onClose={() => setSheet(null)}>
         <View style={{ paddingTop: spacing.xs }}>
@@ -266,6 +291,18 @@ const styles = StyleSheet.create({
   qrHint: { fontSize: 12, color: colors.textSecondary, marginTop: 1 },
   newTag: { backgroundColor: colors.primary, borderRadius: radius.pill, paddingHorizontal: 8, paddingVertical: 2 },
   newTagText: { fontSize: 11, fontWeight: '700', color: colors.onPrimary },
+  nameRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  qrPill: {
+    alignSelf: 'flex-start',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: colors.divider,
+    borderRadius: radius.sm,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+  },
+  qrPillText: { fontSize: 14, fontWeight: '600', color: colors.textPrimary },
   qrCorner: {
     width: 44,
     height: 44,

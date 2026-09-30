@@ -14,7 +14,9 @@ Quản lý tiện ích có thêm ô **Mã QR của tôi** (full-width, tag *Mớ
 
 **Phương án B:** nút QR ở góc phải thẻ hồ sơ (thay chevron), mở cùng sheet Mã QR của tôi; Quản lý tiện ích giữ nguyên 4 ô như app hiện tại.
 
-![](docs/So-sanh_Man-Toi_A-B.png)
+**Phương án C:** theo màn Tôi mới nhất — tên có dấu tích xanh, pill Số tài khoản được thay bằng pill **Mã QR** + icon QR (bấm được), mở sheet Mã QR của tôi. Nút giữa thanh tab là *QR ngân hàng*.
+
+![](docs/So-sanh_Man-Toi_A-B-C.png)
 
 ## Chạy thử
 

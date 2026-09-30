@@ -65,6 +65,16 @@ export function IconQrCorner({ size = 28, color = INK }: P) {
   );
 }
 
+/** Dấu tích xanh cạnh tên (tài khoản đã xác thực). */
+export function IconVerified({ size = 16 }: P) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 16 16">
+      <Circle cx={8} cy={8} r={8} fill="#34B24A" />
+      <Path d="M4.6 8.2l2.2 2.2 4.4-4.6" stroke="#fff" strokeWidth={1.8} fill="none" strokeLinecap="round" strokeLinejoin="round" />
+    </Svg>
+  );
+}
+
 // ---------- Ô Quản lý tiện ích ----------
 export function TileQr({ size = 26 }: P) {
   return (

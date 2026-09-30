@@ -67,14 +67,14 @@ const MODE_CONFIG: Record<
 
 export const formatVnd = (n: number) => `${n.toLocaleString('vi-VN').replace(/,/g, '.')}đ`;
 
-export default function GopQuyScreen() {
+export default function GopQuyScreen({ onBack }: { onBack?: () => void }) {
   const [tab, setTab] = useState<Mode>('gop');
   // Chia sẻ số dư ngân hàng liên kết — dùng chung cho cả 2 tab.
   const [balanceShared, setBalanceShared] = useState(DEFAULT_VCB_BALANCE_SHARED);
   const [consentOpen, setConsentOpen] = useState(false);
   return (
     <View style={styles.root}>
-      <TopNavigation title="Góp/Rút" />
+      <TopNavigation title="Góp/Rút" onBack={onBack} />
       <Tabs
         items={[
           { key: 'gop', label: 'Góp quỹ' },

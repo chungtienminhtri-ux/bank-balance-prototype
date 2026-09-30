@@ -4,6 +4,14 @@ Prototype màn **Góp quỹ** mới: giữ nguyên nhập số tiền + ghi chú
 
 Tab **Rút quỹ** dùng cùng bố cục: số dư quỹ, Cần rút, Ghi chú ở trên; **Chọn nơi nhận tiền** (VCB, Ví MoMo) ở dưới; chip số tiền nhanh trên nút Rút quỹ. Báo lỗi khi số tiền rút vượt số dư quỹ.
 
+## Màn Tôi (My Profile)
+
+Quản lý tiện ích có thêm ô **Mã QR của tôi** (full-width, tag *Mới*). Bấm vào mở bottom sheet: **Mã nhận tiền** và **Mã thanh toán**, mỗi dòng có mô tả. Ô **Vé & đặt chỗ** mở sheet Vé xem phim / Du lịch, đi lại như app hiện tại. App mở vào màn chọn prototype; tab **MoMo** ở màn Tôi quay về màn chọn.
+
+| Màn Tôi | Mã QR của tôi | Vé & đặt chỗ |
+|---|---|---|
+| ![](docs/Profile-01_man-Toi.png) | ![](docs/Profile-02_sheet-Ma-QR-cua-toi.png) | ![](docs/Profile-03_sheet-Ve-dat-cho.png) |
+
 ## Chạy thử
 
 ```bash
